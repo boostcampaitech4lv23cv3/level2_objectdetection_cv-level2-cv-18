@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+visdom = "*"
+seaborn = "*"
+albumentations = "*"
+pycocotools = "*"
+opencv-python = "*"
+tqdm = "*"
+torchnet = "*"
+pandas = "*"
+map-boxes = "*"
+jupyter = "*"
+torch = "*"
+torchvision = "*"
+torchaudio = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
+python_full_version = "3.8.5"
