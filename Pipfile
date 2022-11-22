@@ -19,6 +19,7 @@ torchvision = "*"
 torchaudio = "*"
 mmdet = "*"
 openmim = "*"
+wandb = "*"
 
 [dev-packages]
 

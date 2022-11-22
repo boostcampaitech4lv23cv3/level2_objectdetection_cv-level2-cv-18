@@ -1,5 +1,6 @@
 # local folder
 .local/*
+work_dirs/*
 !.local/README.md
 !.local/demo.jpg
 
@@ -10,6 +11,24 @@ __pycache__/
 
 # C extensions
 *.so
+
+# wandb
+*.swp
+.python-version
+wandb
+wandb-debug.log
+__pycache__
+.ipynb_checkpoints
+.DS_Store
+logs
+summary*
+run*
+colabs/dataset/*
+colabs/train_data/*
+colabs/output/*
+MNIST/*
+log.txt
+colabs/log.txt
 
 # Distribution / packaging
 .Python
