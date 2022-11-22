@@ -17,6 +17,8 @@ jupyter = "*"
 torch = "*"
 torchvision = "*"
 torchaudio = "*"
+mmdet = "*"
+openmim = "*"
 
 [dev-packages]
 
