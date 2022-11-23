@@ -14,3 +14,12 @@ pipenv run mim install mmcv-full
 
 - mmcv와 mmdetection이 제대로 설치되었는지 확인
 - [.local/README.md](.local/README.md) 참조
+
+
+
+
+[train]
+python train.py configs/~~
+
+[inference]
+python test.py configs/~~ work_dirs/~ /latest.pth 
