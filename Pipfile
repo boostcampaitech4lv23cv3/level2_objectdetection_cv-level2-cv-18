@@ -20,8 +20,14 @@ torchaudio = "*"
 mmdet = "*"
 openmim = "*"
 wandb = "*"
+plotly = "*"
+ipykernel = "*"
+funcy = "*"
+scikit-multilearn = "*"
 
 [dev-packages]
+funcy = "*"
+scikit-multilearn = "*"
 
 [requires]
 python_version = "3.8"
