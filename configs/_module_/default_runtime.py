@@ -3,9 +3,9 @@ checkpoint_config = dict(interval=1)
 log_config = dict(
     interval=50,
     hooks=[
-            dict(type='TextLoggerHook'),
-    dict(type='MMDetWandbHook',
-         init_kwargs={'project': 'mmdetection'},
+         dict(type='TextLoggerHook'),
+         dict(type='MMDetWandbHook',
+             init_kwargs={'project': 'Trash Detection', "entity": "light-observer"},
          interval=10,
          log_checkpoint=False,
          log_checkpoint_metadata=True,
