@@ -3,15 +3,42 @@ checkpoint_config = dict(interval=1)
 log_config = dict(
     interval=50,
     hooks=[
-         dict(type='TextLoggerHook'),
-         dict(type='MMDetWandbHook',
-             init_kwargs={'project': 'Trash Detection', "entity": "light-observer"},
-         interval=10,
-         log_checkpoint=False,
-         log_checkpoint_metadata=True,
-         num_eval_images=0,
-         bbox_score_thr=0.3)
-    ])
+        dict(type='TextLoggerHook'),
+        dict(type='WandbLoggerHook',
+            init_kwargs={'project': 'WandB_Test', "entity": "light-observer",  "name" : 'Testing'},
+            # init_kwargs={'project': 'WandB_Test', "entity": "light-observer", "name: wonguk"},
+            interval = 500,
+          
+            )
+   ])
+
+# log_config = dict(
+#     interval=50,
+#     hooks=[
+#     dict(type='TextLoggerHook'),
+#     dict(type='MMDetWandbHook',
+#          init_kwargs={'project': 'WandB_Test', "entity": "light-observer",  "name" : 'Testing'},
+#          interval=100,
+#          log_checkpoint=True,
+#          log_checkpoint_metadata=True,
+#          num_eval_images=100,
+#          bbox_score_thr=0.3
+#          )])
+
+
+
+# log_config = [
+#     dict(type='TextLoggerHook'),
+#     dict(type='MMDetWandbHook',
+#          init_kwargs={'project': 'WandB_Test', "entity": "light-observer",  "name" : 'Testing'},
+#          interval=100,
+#          log_checkpoint=True,
+#          log_checkpoint_metadata=True,
+#          num_eval_images=100,
+#          bbox_score_thr=0.3
+#          )]
+
+
 # yapf:enable
 custom_hooks = [dict(type='NumClassCheckHook')]
 
@@ -20,6 +47,7 @@ log_level = 'INFO'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
+# workflow = [('train', 1),('val',1)]
 
 # disable opencv multithreading to avoid system being overloaded
 opencv_num_threads = 0
