@@ -24,10 +24,12 @@ plotly = "*"
 ipykernel = "*"
 funcy = "*"
 scikit-multilearn = "*"
+numpy = "*"
 
 [dev-packages]
 funcy = "*"
 scikit-multilearn = "*"
+autopep8 = "*"
 
 [requires]
 python_version = "3.8"
