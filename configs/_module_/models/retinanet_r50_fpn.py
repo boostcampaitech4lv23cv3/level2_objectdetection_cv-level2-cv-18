@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+NUM_CLASSES = 10
+
+>>>>>>> 7c92242a3db632e32d4a2b5cf2c1b3e17cbbcecc
 # model settings
 model = dict(
     type='RetinaNet',
@@ -20,7 +25,11 @@ model = dict(
         num_outs=5),
     bbox_head=dict(
         type='RetinaHead',
+<<<<<<< HEAD
         num_classes=80,
+=======
+        num_classes=NUM_CLASSES,
+>>>>>>> 7c92242a3db632e32d4a2b5cf2c1b3e17cbbcecc
         in_channels=256,
         stacked_convs=4,
         feat_channels=256,
