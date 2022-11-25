@@ -8,7 +8,7 @@ log_config = dict(
              init_kwargs={
                  'project': 'Trash Detection',
                  "entity": "light-observer",
-                 "name": "Use FP16"
+                 "name": "YOLOX-LargeBatch"
              },
              interval=10,
              log_checkpoint=False,
