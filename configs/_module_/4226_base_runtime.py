@@ -7,7 +7,8 @@ log_config = dict(
         dict(type='MMDetWandbHook',
              init_kwargs={
                  'project': 'Trash Detection',
-                 "entity": "light-observer"
+                 "entity": "light-observer",
+                 "name": "Use FP16"
              },
              interval=10,
              log_checkpoint=False,
@@ -25,8 +26,7 @@ resume_from = None
 workflow = [('train', 1), ]
 
 # disable opencv multithreading to avoid system being overloaded
-#opencv_num_threads = 0
-opencv_num_threads = 16
+opencv_num_threads = 0
 # set multi-process start method as `fork` to speed up the training
 mp_start_method = 'fork'
 
@@ -34,5 +34,4 @@ mp_start_method = 'fork'
 #   - `enable` means enable scaling LR automatically
 #       or not by default.
 #   - `base_batch_size` = (8 GPUs) x (2 samples per GPU).
-#auto_scale_lr = dict(enable=False, base_batch_size=16)
-auto_scale_lr = dict(enable=True, base_batch_size=4) # (2 GPUs) x (2 samples per GPU)
+auto_scale_lr = dict(enable=False, base_batch_size=16)

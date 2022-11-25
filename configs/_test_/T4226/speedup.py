@@ -1,6 +1,7 @@
 _base_ = ['../../_module_/schedules/schedule_1x.py',
-          #'../../_module_/fp16/mixed_precision.py',
-          '../../_module_/4226_base_runtime.py']
+          '../../_module_/amp/mixed_precision_fixed.py',
+          '../../_module_/4226_base_runtime.py',
+          ]
 
 classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
            "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
@@ -43,7 +44,7 @@ train_pipeline = [
         pad_val=114.0),
     dict(type='YOLOXHSVRandomAug'),
     dict(type='RandomFlip', flip_ratio=0.5),
-    # According to the official implementation, multi-scale
+    # According to the official implementation, multiscale
     # training is not considered here but in the
     # 'mmdet/models/detectors/yolox.py'.
     dict(type='Resize', img_scale=img_scale, keep_ratio=True),
@@ -117,7 +118,7 @@ optimizer = dict(
     paramwise_cfg=dict(norm_decay_mult=0., bias_decay_mult=0.))
 optimizer_config = dict(grad_clip=None)
 
-max_epochs = 300
+max_epochs = 10
 num_last_epochs = 15
 resume_from = None
 interval = 10
