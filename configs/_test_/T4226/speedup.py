@@ -1,5 +1,5 @@
 _base_ = ['../../_module_/schedules/schedule_1x.py',
-          '../../_module_/amp/mixed_precision_fixed.py',
+          #'../../_module_/amp/mixed_precision_fixed.py',
           '../../_module_/4226_base_runtime.py',
           ]
 
@@ -63,8 +63,9 @@ train_dataset = dict(
     type='MultiImageMixDataset',
     dataset=dict(
         type=dataset_type,
-        ann_file=data_root + '/train.json',
+        ann_file=data_root + '/train_split.json',
         img_prefix=data_root,
+        classes=classes,
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True)
@@ -98,13 +99,15 @@ data = dict(
     train=train_dataset,
     val=dict(
         type=dataset_type,
-        ann_file=data_root + '/train.json',
+        ann_file=data_root + '/val_split.json',
         img_prefix=data_root,
+        classes=classes,
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
         ann_file=data_root + '/test.json',
         img_prefix=data_root,
+        classes=classes,
         pipeline=test_pipeline))
 
 # optimizer
