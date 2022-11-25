@@ -1,4 +1,4 @@
-_base_ = ['../_module_/schedules/schedule_1x.py', '../_module_/4190_runtime_wandb.py']
+_base_ = ['../../_module_/schedules/schedule_1x.py', '../../_module_/4190_runtime_wandb.py']
 
 img_scale = (640, 640)  # height, width
 
