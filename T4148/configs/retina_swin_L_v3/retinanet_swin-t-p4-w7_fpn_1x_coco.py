@@ -1,13 +1,10 @@
 _base_ = [
-    '/opt/ml/cv18-detection/configs/_module_/datasets/split_trash_datasets.py',
-    '/opt/ml/cv18-detection/configs/_module_/models/faster_rcnn_r50_fpn.py',
-    '/opt/ml/cv18-detection/configs/_module_/schedules/schedule_adam.py',
-    '/opt/ml/cv18-detection/configs/_module_/default_runtime.py'
+    '../_base_/models/retinanet_r50_fpn.py',
+    '../_base_/datasets/coco_detection.py',
+    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
-
 pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth'  # noqa
 model = dict(
-    type='MaskRCNN',
     backbone=dict(
         _delete_=True,
         type='SwinTransformer',
@@ -22,9 +19,12 @@ model = dict(
         attn_drop_rate=0.,
         drop_path_rate=0.2,
         patch_norm=True,
-        out_indices=(0, 1, 2, 3),
+        out_indices=(1, 2, 3),
+        # Please only add indices that would be used
+        # in FPN, otherwise some parameter will not be used
         with_cp=False,
         convert_weights=True,
         init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
-    neck=dict(in_channels=[96, 192, 384, 768]))
+    neck=dict(in_channels=[192, 384, 768], start_level=0, num_outs=5))
 
+optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
