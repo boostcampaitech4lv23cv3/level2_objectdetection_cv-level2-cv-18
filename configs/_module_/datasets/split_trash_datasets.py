@@ -6,7 +6,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=(512, 512), keep_ratio=True),
+    dict(type='Resize', img_scale=(640, 640), keep_ratio=True),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
@@ -17,7 +17,7 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(512, 512),
+        img_scale=(640, 640),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -31,9 +31,11 @@ test_pipeline = [
 
 classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass", 
            "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
+
+
 data = dict(
-    samples_per_gpu=16,
-    workers_per_gpu=4,
+    samples_per_gpu=32,
+    workers_per_gpu=8,
     train=dict(
         type=dataset_type,
         ann_file=data_root + '/train_split.json',
@@ -52,4 +54,5 @@ data = dict(
         classes= classes,
         img_prefix=data_root ,
         pipeline=test_pipeline))
-evaluation = dict(interval=1, metric='bbox')
+
+evaluation = dict(interval=100, metric='bbox')
