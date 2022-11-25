@@ -1,6 +1,7 @@
 # local folder
 .local/*
 work_dirs/*
+artifacts/*
 !.local/README.md
 !.local/demo.jpg
 

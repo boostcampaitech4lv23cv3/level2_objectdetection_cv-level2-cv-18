@@ -1,5 +1,5 @@
 _base_ = ['../../_module_/schedules/schedule_1x.py',
-          #'../../_module_/amp/mixed_precision_fixed.py',
+          # '../../_module_/amp/mixed_precision_fixed.py',
           '../../_module_/4226_base_runtime.py',
           ]
 
