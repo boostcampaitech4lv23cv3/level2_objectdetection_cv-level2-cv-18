@@ -209,11 +209,18 @@ st.title('EDA collections')
 st.markdown('----')
 
 st.subheader('Confusion Matrix')
-genre = st.radio(
+run_mode = st.radio(
     "Select MODE",
-    ('Eval Only', 'Prediction and Eval'),
+    ('Eval Only', ),
     horizontal=True,
 )
+eval_targets = st.multiselect(
+    "Select Evaluation Size (BBox)",
+    ['Small', 'Medium', 'Large'],
+    ['Medium', 'Large']
+)
+iou = st.slider('Select IoU', 0.05, 0.95, 0.5, 0.05)
+
 st.session_state.work_dirs = st.text_input('Input working_directory', st.session_state.work_dirs)
 st.session_state.pth_file = st.text_input('Input model filename', st.session_state.pth_file)
 st.session_state.val_file = st.text_input('Input validation csv filename', st.session_state.val_file)
