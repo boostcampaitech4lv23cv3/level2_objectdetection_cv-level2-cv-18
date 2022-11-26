@@ -29,6 +29,8 @@ mmdet = "*"
 
 [dev-packages]
 gpustat = "*"
+streamlit = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
