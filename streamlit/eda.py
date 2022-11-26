@@ -206,28 +206,36 @@ def draw_confusion_matrix():
 
 # Main page
 st.title('EDA collections')
-st.markdown('----')
+st.markdown('---')
+st.session_state.work_dirs = st.text_input('Input working_directory', st.session_state.work_dirs)
+st.session_state.val_file = st.text_input('Input validation csv filename', st.session_state.val_file)
+st.markdown('---')
 
 st.subheader('Confusion Matrix')
-run_mode = st.radio(
-    "Select MODE",
-    ('Eval Only', ),
-    horizontal=True,
-)
+
 eval_targets = st.multiselect(
     "Select Evaluation Size (BBox)",
     ['Small', 'Medium', 'Large'],
     ['Medium', 'Large']
 )
-iou = st.slider('Select IoU', 0.05, 0.95, 0.5, 0.05)
+limit_cm_iou = st.slider('Select IoU', 0.05, 0.95, 0.5, 0.05)
 
-st.session_state.work_dirs = st.text_input('Input working_directory', st.session_state.work_dirs)
-st.session_state.pth_file = st.text_input('Input model filename', st.session_state.pth_file)
-st.session_state.val_file = st.text_input('Input validation csv filename', st.session_state.val_file)
-
-st.button('Draw confusion matrix', on_click=draw_confusion_matrix, type="primary")
-st.markdown('----')
-
+st.button('Draw', on_click=draw_confusion_matrix, type="primary")
 cm_placeholder = st.empty()
 if st.session_state.complete_pred and st.session_state.confusion_matrix_image:
     cm_placeholder.image(st.session_state.confusion_matrix_image)
+st.markdown('---')
+
+st.subheader('Boundary Box with Image')
+require_sort = st.checkbox('Sort mAP')
+limit_bbox_iou = st.slider('Select minimum IoU', 0.05, 0.95, 0.5, 0.05)
+bbox_targets = st.multiselect(
+    "Select Category",
+    ['General trash', "Paper", "Paper pack", "Metal", "Glass",
+     "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"],
+    ['General trash', "Paper", "Paper pack", "Metal", "Glass",
+     "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
+)
+st.button('Show', type="primary")
+
+st.markdown('---')
