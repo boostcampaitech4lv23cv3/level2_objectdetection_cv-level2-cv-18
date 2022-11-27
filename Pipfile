@@ -26,6 +26,7 @@ scikit-multilearn = "*"
 numpy = "*"
 autopep8 = "*"
 mmdet = "*"
+timm = "*"
 
 [dev-packages]
 gpustat = "*"
