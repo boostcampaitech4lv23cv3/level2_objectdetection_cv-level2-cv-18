@@ -77,22 +77,6 @@ train_dataset = dict(
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='MultiScaleFlipAug',
-        img_scale=[(480, 1333), (512, 1333), (544, 1333), (576, 1333),
-                           (608, 1333), (640, 1333), (672, 1333), (704, 1333),
-                           (736, 1333), (768, 1333), (800, 1333)],
-        flip=False,
-        transforms=[
-            dict(type='Resize', keep_ratio=True),
-            dict(type='RandomFlip'),
-            dict(
-                type='Pad',
-                pad_to_square=True,
-                pad_val=dict(img=(114.0, 114.0, 114.0))),
-            dict(type='DefaultFormatBundle'),
-            dict(type='Collect', keys=['img'])
-        ])
 ]
 
 data = dict(
@@ -116,24 +100,15 @@ data = dict(
 lr_config = dict(policy='step', step=[27, 33])
 runner = dict(type='EpochBasedRunner', max_epochs=36)
 
-checkpoint_config = dict(interval=3)
+checkpoint_config = dict(interval=6)
 evaluation = dict(
     save_best='auto',
-    # The evaluation interval is 'interval' when running epoch is
-    # less than ‘max_epochs - num_last_epochs’.
-    # The evaluation interval is 1 when running epoch is greater than
-    # or equal to ‘max_epochs - num_last_epochs’.
-    interval=3,
-    dynamic_intervals=[(32 - 3, 1)],
+    interval=6,
+    dynamic_intervals=[(36 - 12, 1)],
     metric='bbox')
 
-# NOTE: `auto_scale_lr` is for automatically scaling LR,
-# USER SHOULD NOT CHANGE ITS VALUES.
-# base_batch_size = (8 GPUs) x (8 samples per GPU)
-auto_scale_lr = dict(enable=True, base_batch_size=16)
-
 log_config = dict(
-    interval=3,
+    interval=6,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='MMDetWandbHook',
@@ -142,8 +117,8 @@ log_config = dict(
                  "entity": "light-observer",
                  "name": "T4226_sparse-rcnn-focalnet",
              },
-             interval=3,
-             log_checkpoint=False,
+             interval=6,
+             log_checkpoint=True,
              log_checkpoint_metadata=True,
              num_eval_images=100,
              bbox_score_thr=0.3)
