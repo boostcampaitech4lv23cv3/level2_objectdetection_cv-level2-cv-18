@@ -34,8 +34,8 @@ def main(args) :
     model_config_path = config_path
     model_device = 'cuda:0'
     model_confidence_threshold = 0.5
-    slice_height = args.image_size[0]
-    slice_width = args.image_size[1]
+    slice_height = args.image_size[1]
+    slice_width = args.image_size[0]
     overlap_height_ratio = 0.2
     overlap_width_ratio = 0.2
     source_image_dir = test_data_path
@@ -65,14 +65,14 @@ def main(args) :
     prediction_strings = []
     file_names = []
     coco = COCO(cfg.data.test.ann_file)
-    pickle_list = os.listdir(f"{project}/{name}3/pickles")
+    pickle_list = os.listdir(f"{project}/{name}/pickles")
     prediction_strings = []
     file_names = []
     for file in sorted(pickle_list):
         img_num, _ = file.split(".")
         image_info = coco.loadImgs(coco.getImgIds(imgIds=int(img_num)))[0]
         prediction_string = ''
-        with open(f"{project}/{name}3/pickles/{file}","rb") as fr:
+        with open(f"{project}/{name}/pickles/{file}","rb") as fr:
 
             data = pickle.load(fr)
             for d in data:
