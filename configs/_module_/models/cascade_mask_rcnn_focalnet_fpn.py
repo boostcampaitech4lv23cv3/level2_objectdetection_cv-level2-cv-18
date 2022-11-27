@@ -1,7 +1,6 @@
 # model settings
 model = dict(
     type='CascadeRCNN',
-    pretrained='/data/notebook/competition/cv-18/trash/configs/_module_/models/focalnet_tiny_lrf_cascade_maskrcnn_3x.pth',
     backbone=dict(
         type='FocalNet',
         embed_dim=96,

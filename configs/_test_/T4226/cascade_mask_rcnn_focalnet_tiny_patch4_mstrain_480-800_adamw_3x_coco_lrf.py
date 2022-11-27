@@ -9,6 +9,9 @@ classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
            "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
 num_classes = len(classes)
 
+init_cfg = dict(type='Pretrained',
+                checkpoint='https://projects4jw.blob.core.windows.net/focalnet/release/detection/focalnet_tiny_lrf_cascade_maskrcnn_3x.pth')
+
 model = dict(
     backbone=dict(
         type='FocalNet',
