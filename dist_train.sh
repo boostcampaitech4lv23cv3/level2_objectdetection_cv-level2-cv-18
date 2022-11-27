@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+OMP_NUM_THREADS=24
+MKL_NUM_THREADS=24
+
 CONFIG=$1
 GPUS=$2
 NNODES=${NNODES:-1}
