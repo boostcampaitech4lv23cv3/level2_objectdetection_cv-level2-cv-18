@@ -3,7 +3,6 @@ checkpoint_config = dict(interval=1)
 log_config = dict(
     interval=50,
     hooks=[
-<<<<<<< HEAD
          dict(type='TextLoggerHook'),
          # dict(type='TensorboardLoggerHook'),
          dict(type='MMDetWandbHook',
@@ -13,10 +12,6 @@ log_config = dict(
          log_checkpoint_metadata=True,
          num_eval_images=0,
          bbox_score_thr=0.3)
-=======
-        dict(type='TextLoggerHook'),
-        # dict(type='TensorboardLoggerHook'),
->>>>>>> 7c92242a3db632e32d4a2b5cf2c1b3e17cbbcecc
     ])
 # yapf:enable
 custom_hooks = [dict(type='NumClassCheckHook')]
