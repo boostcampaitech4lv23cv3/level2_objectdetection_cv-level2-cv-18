@@ -17,17 +17,20 @@ jupyter = "*"
 torch = "*"
 torchvision = "*"
 torchaudio = "*"
-mmdet = "*"
 openmim = "*"
 wandb = "*"
 plotly = "*"
 ipykernel = "*"
 funcy = "*"
 scikit-multilearn = "*"
+numpy = "*"
+autopep8 = "*"
+mmdet = "*"
 
 [dev-packages]
-funcy = "*"
-scikit-multilearn = "*"
+gpustat = "*"
+streamlit = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
