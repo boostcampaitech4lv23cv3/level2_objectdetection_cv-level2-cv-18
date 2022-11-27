@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+OMP_NUM_THREADS=24
+MKL_NUM_THREADS=24
+
 CONFIG=$1
-# GPUS=$2
-GPUS=`nvidia-smi  -L | wc -l`
+GPUS=$2
+#GPUS=`nvidia-smi  -L | wc -l`
 NNODES=${NNODES:-1}
 NODE_RANK=${NODE_RANK:-0}
 # PORT=${PORT:-29500}

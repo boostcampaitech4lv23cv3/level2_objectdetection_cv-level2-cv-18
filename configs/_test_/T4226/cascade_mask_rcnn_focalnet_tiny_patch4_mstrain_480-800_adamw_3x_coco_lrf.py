@@ -1,8 +1,8 @@
 _base_ = [
-    '../models/cascade_mask_rcnn_focalnet_fpn.py',
-    '../datasets/coco_detection.py',
-    '../schedules/schedule_1x.py',
-    '../default_wandb_runtime.py'
+    '../../_module_/models/cascade_mask_rcnn_focalnet_fpn.py',
+    '../../_module_/datasets/coco_detection.py',
+    '../../_module_/schedules/schedule_1x.py',
+    '../../_module_/default_wandb_runtime.py'
 ]
 
 classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
@@ -123,7 +123,7 @@ train_pipeline = [
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels']),
 ]
 
 # dataset settings
@@ -131,8 +131,8 @@ dataset_type = 'CocoDataset'
 data_root = '/opt/ml/dataset'
 
 data = dict(
-    samples_per_gpu=32,
-    workers_per_gpu=4,
+    samples_per_gpu=8,
+    workers_per_gpu=8,
     train=dict(
         type=dataset_type,
         ann_file=data_root + '/train_split.json',
@@ -158,16 +158,33 @@ optimizer = dict(_delete_=True, type='AdamW', lr=0.0001, betas=(0.9, 0.999), wei
                  paramwise_cfg=dict(custom_keys={'absolute_pos_embed': dict(decay_mult=0.),
                                                  'relative_position_bias_table': dict(decay_mult=0.),
                                                  'norm': dict(decay_mult=0.)}))
-lr_config = dict(step=[27, 33])
-runner = dict(type='EpochBasedRunnerAmp', max_epochs=36)
+optimizer_config = dict(grad_clip=None)
 
-# do not use mmdet version fp16
-fp16 = None
-optimizer_config = dict(
-    type="DistOptimizerHook",
-    update_interval=1,
-    grad_clip=None,
-    coalesce=True,
-    bucket_size_mb=-1,
-    use_fp16=True,
-)
+lr_config = dict(step=[27, 33])
+runner = dict(type='EpochBasedRunner', max_epochs=36)
+
+checkpoint_config = dict(interval=6)
+evaluation = dict(
+    save_best='auto',
+    interval=6,
+    dynamic_intervals=[(36 - 12, 1)],
+    metric='bbox')
+
+auto_scale_lr = dict(enable=True, base_batch_size=16)
+
+log_config = dict(
+    interval=6,
+    hooks=[
+        dict(type='TextLoggerHook'),
+        dict(type='MMDetWandbHook',
+             init_kwargs={
+                 'project': 'Trash Detection',
+                 "entity": "light-observer",
+                 "name": "T4226_cascade-rcnn-focalnet_01"
+             },
+             interval=6,
+             log_checkpoint=False,
+             log_checkpoint_metadata=True,
+             num_eval_images=100,
+             bbox_score_thr=0.3)
+    ])

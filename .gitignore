@@ -4,6 +4,7 @@ work_dirs/*
 artifacts/*
 !.local/README.md
 !.local/demo.jpg
+*.pth
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
