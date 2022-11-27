@@ -12,7 +12,7 @@ model = dict(
         init_cfg=dict(type='Pretrained',
                       checkpoint='torchvision://resnet101')))
 # optimizer
-optimizer = dict(type='AdamW', lr=0.001, betas=(0.9, 0.999), weight_decay=0.0004,paramwise_cfg=dict(
+optimizer = dict(type='AdamW', lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0004,paramwise_cfg=dict(
         custom_keys={
             'absolute_pos_embed': dict(decay_mult=0.),
             'relative_position_bias_table': dict(decay_mult=0.),
@@ -24,7 +24,7 @@ optimizer_config = dict(grad_clip=None)
 runner = dict(type='EpochBasedRunner', max_epochs=MAX_EPOCHS)
 
 data = dict(
-    samples_per_gpu=64,
+    samples_per_gpu=32,
     workers_per_gpu=4,)
 
 # learning policy
