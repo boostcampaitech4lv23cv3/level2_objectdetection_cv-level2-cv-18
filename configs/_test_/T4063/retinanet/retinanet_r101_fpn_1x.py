@@ -1,12 +1,18 @@
 _base_ = [
-    '../../../_module_/models/retinanet_r50_fpn.py',
-    '../../../_module_/datasets/coco_detection.py',
-    # '../../../_module_/schedules/schedule_1x.py', 
-    '../../../_module_/default_runtime.py'
+    '../../../_module_/amp/mixed_precision_fixed.py',
+    './retinanet_r50_fpn_1x.py',
 ]
-WANDB_RUN_NAME = 'retinanet_r50_fpn_1x'
 
-optimizer = dict(type='AdamW', lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0005,paramwise_cfg=dict(
+WANDB_RUN_NAME = 'retinanet_r101_fpn_1x'
+MAX_EPOCHS = 50
+
+model = dict(
+    backbone=dict(
+        depth=101,
+        init_cfg=dict(type='Pretrained',
+                      checkpoint='torchvision://resnet101')))
+# optimizer
+optimizer = dict(type='AdamW', lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0004,paramwise_cfg=dict(
         custom_keys={
             'absolute_pos_embed': dict(decay_mult=0.),
             'relative_position_bias_table': dict(decay_mult=0.),
@@ -15,7 +21,11 @@ optimizer = dict(type='AdamW', lr=0.0001, betas=(0.9, 0.999), weight_decay=0.000
 
 optimizer_config = dict(grad_clip=None)
 
-runner = dict(type='EpochBasedRunner', max_epochs=50)
+runner = dict(type='EpochBasedRunner', max_epochs=MAX_EPOCHS)
+
+data = dict(
+    samples_per_gpu=32,
+    workers_per_gpu=4,)
 
 # learning policy
 lr_config = dict(
@@ -24,11 +34,6 @@ lr_config = dict(
     warmup_iters=1000,
     warmup_ratio=0.001,
     step=[8, 11])
-
-# NOTE: `auto_scale_lr` is for automatically scaling LR,
-# USER SHOULD NOT CHANGE ITS VALUES.
-# base_batch_size = (8 GPUs) x (2 samples per GPU)
-auto_scale_lr = dict(base_batch_size=16)
 
 log_config = dict(
     interval=50,
