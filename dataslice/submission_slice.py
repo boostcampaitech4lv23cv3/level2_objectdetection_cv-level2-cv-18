@@ -33,7 +33,7 @@ def main(args) :
     model_path = model_path
     model_config_path = config_path
     model_device = 'cuda:0'
-    model_confidence_threshold = 0.4
+    model_confidence_threshold = 0.5
     slice_height = args.image_size[0]
     slice_width = args.image_size[1]
     overlap_height_ratio = 0.2
@@ -65,20 +65,20 @@ def main(args) :
     prediction_strings = []
     file_names = []
     coco = COCO(cfg.data.test.ann_file)
-    pickle_list = os.listdir(f"{project}/{name}/pickles")
+    pickle_list = os.listdir(f"{project}/{name}3/pickles")
     prediction_strings = []
     file_names = []
     for file in sorted(pickle_list):
         img_num, _ = file.split(".")
         image_info = coco.loadImgs(coco.getImgIds(imgIds=int(img_num)))[0]
         prediction_string = ''
-        with open(f"{project}/{name}/pickles/{file}","rb") as fr:
+        with open(f"{project}/{name}3/pickles/{file}","rb") as fr:
 
             data = pickle.load(fr)
             for d in data:
                 coco_prediction = d.to_coco_prediction()
                 coco_prediction_json = coco_prediction.json
-                prediction_string += str(coco_prediction_json['category_id']) + ' ' + str(coco_prediction_json['score']) + ' ' + str(coco_prediction_json['bbox'][0]) + ' ' + str(coco_prediction_json['bbox'][1]) + ' ' + str(coco_prediction_json['bbox'][2]) + ' ' + str(coco_prediction_json['bbox'][3]) + ' '
+                prediction_string += str(coco_prediction_json['category_id']) + ' ' + str(coco_prediction_json['score']) + ' ' + str(float(coco_prediction_json['bbox'][0])) + ' ' + str(float(coco_prediction_json['bbox'][0])+float(coco_prediction_json['bbox'][2])) + ' ' + str(float(coco_prediction_json['bbox'][1])) + ' ' + str(float(coco_prediction_json['bbox'][1])+float(coco_prediction_json['bbox'][3])) + ' '
 
         prediction_strings.append(prediction_string)
         file_names.append(image_info['file_name'])
