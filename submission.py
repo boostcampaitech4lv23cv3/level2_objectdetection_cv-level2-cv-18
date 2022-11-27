@@ -9,7 +9,7 @@ import os
 from mmcv.parallel import MMDataParallel
 import pandas as pd
 from pandas import DataFrame
-from pycocotools.coco import COCOsu
+from pycocotools.coco import COCO
 import numpy as np
 import argparse
 
