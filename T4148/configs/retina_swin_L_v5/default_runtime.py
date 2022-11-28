@@ -1,4 +1,4 @@
-checkpoint_config = dict(interval=2)
+checkpoint_config = dict(interval=3)
 # yapf:disable
 log_config = dict(
     interval=50,
@@ -6,11 +6,11 @@ log_config = dict(
          dict(type='TextLoggerHook'),
          # dict(type='TensorboardLoggerHook'),
          dict(type='MMDetWandbHook',
-             init_kwargs={'project': 'Trash Detection', "entity": "light-observer", "name" : "retinanet_swin_tiny"},
+             init_kwargs={'project': 'Trash Detection', "entity": "light-observer", "name" : "retinanet_swin_large_v4"},
          interval=100,
          log_checkpoint=False,
          log_checkpoint_metadata=True,
-         num_eval_images=0,
+         num_eval_images=10,
          bbox_score_thr=0.3)
     ])
 # yapf:enable
@@ -31,4 +31,4 @@ mp_start_method = 'fork'
 #   - `enable` means enable scaling LR automatically
 #       or not by default.
 #   - `base_batch_size` = (8 GPUs) x (2 samples per GPU).
-auto_scale_lr = dict(enable=False, base_batch_size=16)
+auto_scale_lr = dict(enable=True, base_batch_size=16)
