@@ -327,6 +327,9 @@ st.title('Train Image Viewer')
 st.text(f'Current Working Path: {os.getcwd()}    Datasets Path: {gt_path}[{os.path.exists(gt_path)}]')
 if os.path.exists(gt_path):
     init_session_manager()
+else:
+    st.error('Not found: Datasets', icon="🚨")
+    st.stop()
 
 # st.write(st.session_state.train_raw_dataset.dataset)
 
