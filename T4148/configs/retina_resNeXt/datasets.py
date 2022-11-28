@@ -48,26 +48,11 @@ albu_train_transforms = [    # 알부멘테이션 사용
 ]
 
 
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=[(768, 512), (512, 768)], multiscale_mode = 'value', keep_ratio=True),
-        dict(
-        type='Albu',
-        transforms=albu_train_transforms, # 추가 부분
-        bbox_params=dict(
-            type='BboxParams',
-            format='pascal_voc',
-            label_fields=['gt_labels'],
-            min_visibility=0.0,
-            filter_lost_elements=True),
-        keymap={
-            'img': 'image',
-            'gt_masks': 'masks',
-            'gt_bboxes': 'bboxes'
-        },
-        update_pad_shape=False,
-        skip_img_without_anno=True),
+    dict(type='Resize', img_scale=[(512, 768), (768, 512)], multiscale_mode = 'range', keep_ratio=True),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
@@ -116,4 +101,4 @@ data = dict(
         img_prefix=data_root ,
         pipeline=test_pipeline))
 
-evaluation = dict(interval=1, metric='bbox', save_best='auto')
+evaluation = dict(interval=1, metric='bbox',save_best='auto')
