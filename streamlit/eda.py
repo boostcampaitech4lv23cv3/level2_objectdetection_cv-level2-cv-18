@@ -14,7 +14,6 @@ import mmdet.core.visualization.image as bbox_util
 # Configuration
 gt_path = '../dataset/train.json'
 train_image_path = '../dataset'
-train_raw_dataset = None
 classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
            "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
 
@@ -26,6 +25,9 @@ def init_session_manager():
 
     if not st.session_state.complete_pred:
         st.session_state.confusion_matrix_image = None
+
+    if "train_raw_dataset" not in st.session_state:
+        st.session_state.train_raw_dataset = COCO(gt_path)
 
     if "train_dataframe" not in st.session_state:
         st.session_state.train_dataframe = None
@@ -53,11 +55,6 @@ def init_session_manager():
 
 
 # Sub functions
-def load_coco(path):
-    global train_raw_dataset
-    train_raw_dataset = COCO(path)
-
-
 def box_iou_calc(boxes1, boxes2):
     # <https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py>
     """
@@ -234,14 +231,18 @@ def draw_confusion_matrix():
 
 
 def reload_train_data():
-    st.session_state.train_dataframe = f'{st.session_state.train_bbox_size}  {st.session_state.train_bbox_class}'
-    draw_train_image()
+    st.session_state.train_dataframe = pd.DataFrame({'filename': [],
+                                                     'ann_count': [],
+                                                     'ann_min_size': [],
+                                                     'ann_max_size': [],
+                                                     'anns': [],
+                                                     })
 
 
 def draw_train_image():
-    image_info = train_raw_dataset.loadImgs(st.session_state.selected_train_image_id)[0]
-    ann_ids = train_raw_dataset.getAnnIds(imgIds=image_info['id'])
-    anns = train_raw_dataset.loadAnns(ann_ids)
+    image_info = st.session_state.train_raw_dataset.loadImgs(st.session_state.selected_train_image_id)[0]
+    ann_ids = st.session_state.train_raw_dataset.getAnnIds(imgIds=image_info['id'])
+    anns = st.session_state.train_raw_dataset.loadAnns(ann_ids)
 
     #st.write(f'{st.session_state.train_bbox_size}')
     #st.write(f'{st.session_state.train_bbox_class}')
@@ -249,6 +250,11 @@ def draw_train_image():
 
     filter_class = [classes.index(c) for c in st.session_state.train_bbox_class]
     anns = [a for a in anns if a['category_id'] in filter_class]
+
+    if "Remove ↓1**2" in st.session_state.train_bbox_size:
+        anns = [a for a in anns if a['area'] >= 1 ** 2]
+    if "Remove ↑1023**2" in st.session_state.train_bbox_size:
+        anns = [a for a in anns if a['area'] < 1023 ** 2]
     if "Small" not in st.session_state.train_bbox_size:
         anns = [a for a in anns if a['area'] >= 32**2]
     if "Large" not in st.session_state.train_bbox_size:
@@ -256,7 +262,8 @@ def draw_train_image():
     if "Medium" not in st.session_state.train_bbox_size:
         anns = [a for a in anns if (a['area'] < 32**2 or a['area'] >= 96**2)]
 
-    #st.write(f'{anns}')
+    with st.expander("See Annotations"):
+        st.dataframe(anns)
 
     img_path = os.path.join(train_image_path, image_info['file_name'])
     if anns is not None and len(anns) > 0:
@@ -275,8 +282,8 @@ def draw_train_image():
 def update_numin():
     if st.session_state.number_input_image_id < 0:
         st.session_state.number_input_image_id = 0
-    elif st.session_state.number_input_image_id > len(train_raw_dataset.dataset['images']) - 1:
-        st.session_state.number_input_image_id = len(train_raw_dataset.dataset['images']) - 1
+    elif st.session_state.number_input_image_id > len(st.session_state.train_raw_dataset.dataset['images']) - 1:
+        st.session_state.number_input_image_id = len(st.session_state.train_raw_dataset.dataset['images']) - 1
     st.session_state.selected_train_image_id = st.session_state.number_input_image_id
     draw_train_image()
 
@@ -287,19 +294,18 @@ def update_slider():
 
 
 # Main page
-init_session_manager()
 st.set_page_config(layout="wide")
 
 st.title('Train Image Viewer')
 st.text(f'Current Working Path: {os.getcwd()}    Datasets Path: {gt_path}[{os.path.exists(gt_path)}]')
 if os.path.exists(gt_path):
-    load_coco(gt_path)
+    init_session_manager()
 
-# st.write(train_raw_dataset.dataset)
+# st.write(st.session_state.train_raw_dataset.dataset)
 
 train_bbox_size = st.multiselect(
     "Select Train Target Size (BBox)",
-    ['Small', 'Medium', 'Large'],
+    ['Remove ↓1**2', 'Small', 'Medium', 'Large', 'Remove ↑1023**2'],
     ['Small', 'Medium', 'Large'],
     on_change=reload_train_data,
     key='train_bbox_size'
@@ -313,13 +319,14 @@ train_bbox_class = st.multiselect(
 )
 with st.expander("See Dataframe"):
     train_dataframe_placeholder = st.empty()
-    if st.session_state.train_dataframe:
-        train_dataframe_placeholder.write(st.session_state.train_dataframe)
+    reload_train_data()
+    if st.session_state.train_dataframe is not None:
+        train_dataframe_placeholder.dataframe(st.session_state.train_dataframe)
 
 col1, col2 = st.columns([1, 5])
 col1.number_input('Image ID', step=1, value=st.session_state.selected_train_image_id,
                   on_change=update_numin, key='number_input_image_id')
-col2.slider('Image ID', min_value=0, max_value=len(train_raw_dataset.dataset['images']) - 1,
+col2.slider('Image ID', min_value=0, max_value=len(st.session_state.train_raw_dataset.dataset['images']) - 1,
             value=st.session_state.selected_train_image_id,
             on_change=update_slider, key='slider_image_id')
 train_image_placeholder = st.empty()
