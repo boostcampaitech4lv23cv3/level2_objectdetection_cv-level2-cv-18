@@ -262,8 +262,7 @@ def draw_train_image():
     if "Medium" not in st.session_state.train_bbox_size:
         anns = [a for a in anns if (a['area'] < 32**2 or a['area'] >= 96**2)]
 
-    with st.expander("See Annotations"):
-        st.dataframe(anns)
+    st.session_state.train_anns = anns
 
     img_path = os.path.join(train_image_path, image_info['file_name'])
     if anns is not None and len(anns) > 0:
@@ -333,6 +332,9 @@ train_image_placeholder = st.empty()
 draw_train_image()
 if st.session_state.train_bboxed_image is not None:
     train_image_placeholder.image(st.session_state.train_bboxed_image)
+    with st.expander("See Annotations"):
+        st.dataframe(st.session_state.train_anns)
+
 
 st.markdown('---')
 st.title('Validation Result EDA')
