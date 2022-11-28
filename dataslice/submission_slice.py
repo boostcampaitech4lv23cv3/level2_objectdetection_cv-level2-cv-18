@@ -33,7 +33,7 @@ def main(args) :
     model_path = model_path
     model_config_path = config_path
     model_device = 'cuda:0'
-    model_confidence_threshold = 0.5
+    model_confidence_threshold = 0.4
     slice_height = args.image_size[1]
     slice_width = args.image_size[0]
     overlap_height_ratio = 0.2
@@ -41,7 +41,9 @@ def main(args) :
     source_image_dir = test_data_path
     project = args.work_dir
     name = 'exp'
-    novisual = True
+    novisual = False
+    
+    os.system(f"rm -rf {project}/{name}")
     
     predict(
         model_type=model_type,
@@ -78,7 +80,7 @@ def main(args) :
             for d in data:
                 coco_prediction = d.to_coco_prediction()
                 coco_prediction_json = coco_prediction.json
-                prediction_string += str(coco_prediction_json['category_id']) + ' ' + str(coco_prediction_json['score']) + ' ' + str(float(coco_prediction_json['bbox'][0])) + ' ' + str(float(coco_prediction_json['bbox'][0])+float(coco_prediction_json['bbox'][2])) + ' ' + str(float(coco_prediction_json['bbox'][1])) + ' ' + str(float(coco_prediction_json['bbox'][1])+float(coco_prediction_json['bbox'][3])) + ' '
+                prediction_string += str(coco_prediction_json['category_id']) + ' ' + str(coco_prediction_json['score']) + ' ' + str(float(coco_prediction_json['bbox'][0])) + ' ' + str(float(coco_prediction_json['bbox'][1]))  + ' ' + str(float(coco_prediction_json['bbox'][0])+float(coco_prediction_json['bbox'][2])) + ' ' + str(float(coco_prediction_json['bbox'][1])+float(coco_prediction_json['bbox'][3])) + ' '
 
         prediction_strings.append(prediction_string)
         file_names.append(image_info['file_name'])
@@ -87,7 +89,7 @@ def main(args) :
     submission['image_id'] = file_names
     submission.to_csv(os.path.join(args.work_dir, f'{args.model_name}_submission_slice.csv'), index=None)  # type: ignore
     print("done")
-    os.system(f"rm -rf {project}/{name}")
+    # os.system(f"rm -rf {project}/{name}")
 
     
 
