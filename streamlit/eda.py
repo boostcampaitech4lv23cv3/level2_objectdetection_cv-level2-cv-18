@@ -231,12 +231,40 @@ def draw_confusion_matrix():
 
 
 def reload_train_data():
-    st.session_state.train_dataframe = pd.DataFrame({'filename': [],
-                                                     'ann_count': [],
-                                                     'ann_min_size': [],
-                                                     'ann_max_size': [],
-                                                     'anns': [],
-                                                     })
+    temporary_dict = {'filename': [],
+                      'ann_count': [],
+                      'ann_min_size': [],
+                      'ann_max_size': [],
+                      'class_count': [],
+                      }
+
+    for train_row in st.session_state.train_raw_dataset.dataset['images']:
+        ann_ids = st.session_state.train_raw_dataset.getAnnIds(imgIds=train_row['id'])
+        anns = st.session_state.train_raw_dataset.loadAnns(ann_ids)
+
+        filter_class = [classes.index(c) for c in st.session_state.train_bbox_class]
+        anns = [a for a in anns if a['category_id'] in filter_class]
+        if "Remove ↓1**2" in st.session_state.train_bbox_size:
+            anns = [a for a in anns if a['area'] >= 1 ** 2]
+        if "Remove ↑1023**2" in st.session_state.train_bbox_size:
+            anns = [a for a in anns if a['area'] < 1023 ** 2]
+        if "Small" not in st.session_state.train_bbox_size:
+            anns = [a for a in anns if a['area'] >= 32 ** 2]
+        if "Large" not in st.session_state.train_bbox_size:
+            anns = [a for a in anns if a['area'] < 96 ** 2]
+        if "Medium" not in st.session_state.train_bbox_size:
+            anns = [a for a in anns if (a['area'] < 32 ** 2 or a['area'] >= 96 ** 2)]
+
+        anns = sorted(anns, key=lambda d: d['area'])
+
+        if anns:
+            temporary_dict['filename'].append([train_row['file_name']])
+            temporary_dict['ann_count'].append(len(ann_ids))
+            temporary_dict['ann_min_size'].append(anns[0]['area'])
+            temporary_dict['ann_max_size'].append(anns[-1]['area'])
+            temporary_dict['class_count'].append(len(set([a['category_id'] for a in anns])))
+
+    st.session_state.train_dataframe = pd.DataFrame.from_dict(temporary_dict)
 
 
 def draw_train_image():
