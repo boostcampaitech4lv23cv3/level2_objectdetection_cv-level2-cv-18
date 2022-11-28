@@ -26,9 +26,12 @@ scikit-multilearn = "*"
 numpy = "*"
 autopep8 = "*"
 mmdet = "*"
+sahi = "*"
 
 [dev-packages]
 gpustat = "*"
+streamlit = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
