@@ -27,11 +27,15 @@ numpy = "*"
 autopep8 = "*"
 mmdet = "*"
 sahi = "*"
+mmcls = "*"
+pyqt6 = "*"
 
 [dev-packages]
 gpustat = "*"
 streamlit = "*"
 matplotlib = "*"
+labelme = "*"
+pyqt5 = "*"
 
 [requires]
 python_version = "3.8"
