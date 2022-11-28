@@ -3,7 +3,7 @@ classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
            "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
 dataset_type = 'CocoDataset'
 data_root = '/opt/ml/dataset'
-img_scale = (800, 640)  # height, width
+img_scale = (512, 512)  # height, width
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -56,11 +56,16 @@ test_pipeline = [
 
 data = dict(
     samples_per_gpu=16,
-    workers_per_gpu=8,
-    train=train_dataset,
+    workers_per_gpu=4,
+    train=dict(
+        type=dataset_type,
+        ann_file=data_root + '/train_split.json',
+        img_prefix=data_root ,
+        classes= classes,
+        pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + '/train.json',
+        ann_file=data_root + '/val_split.json',
         img_prefix=data_root ,
         classes= classes,
         pipeline=test_pipeline),
@@ -70,4 +75,4 @@ data = dict(
         classes= classes,
         img_prefix=data_root ,
         pipeline=test_pipeline))
-# evaluation = dict(interval=1, metric='bbox')
+evaluation = dict(interval=1, metric='bbox')
