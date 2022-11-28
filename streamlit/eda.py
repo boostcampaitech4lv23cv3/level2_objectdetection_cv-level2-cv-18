@@ -6,30 +6,58 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sn
+import cv2
 
 from pycocotools.coco import COCO
+import mmdet.core.visualization.image as bbox_util
 
 # Configuration
 gt_path = '../dataset/train.json'
+train_image_path = '../dataset'
+train_raw_dataset = None
+classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
+           "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
+
 
 # Session Manager
-if "complete_pred" not in st.session_state:
-    st.session_state.complete_pred = False
+def init_session_manager():
+    if "complete_pred" not in st.session_state:
+        st.session_state.complete_pred = False
 
-if not st.session_state.complete_pred:
-    st.session_state.confusion_matrix_image = None
+    if not st.session_state.complete_pred:
+        st.session_state.confusion_matrix_image = None
 
-if "work_dirs" not in st.session_state:
-    st.session_state.work_dirs = './work_dirs/mask-rcnn'
+    if "train_dataframe" not in st.session_state:
+        st.session_state.train_dataframe = None
 
-if "pth_file" not in st.session_state:
-    st.session_state.pth_file = 'best_bbox_mAP_epoch_300.pth'
+    if "train_bboxed_image" not in st.session_state:
+        st.session_state.train_bboxed_image = None
 
-if "val_file" not in st.session_state:
-    st.session_state.val_file = 'best_bbox_mAP_epoch_300.pth_submission.csv'
+    if "work_dirs" not in st.session_state:
+        st.session_state.work_dirs = './work_dirs/mask-rcnn'
+
+    if "pth_file" not in st.session_state:
+        st.session_state.pth_file = 'best_bbox_mAP_epoch_300.pth'
+
+    if "val_file" not in st.session_state:
+        st.session_state.val_file = 'best_bbox_mAP_epoch_300.pth_submission.csv'
+
+    if "selected_train_image_id" not in st.session_state:
+        st.session_state.selected_train_image_id = 0
+
+    if "train_bbox_size" not in st.session_state:
+        st.session_state.train_bbox_size = ['Small', 'Medium', 'Large']
+
+    if "train_bbox_class" not in st.session_state:
+        st.session_state.train_bbox_class = classes
 
 
 # Sub functions
+def load_coco(path):
+    global train_raw_dataset
+    train_raw_dataset = COCO(path)
+
+
 def box_iou_calc(boxes1, boxes2):
     # <https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py>
     """
@@ -199,18 +227,113 @@ def draw_confusion_matrix():
     for p, g in zip(new_pred, gt):
         conf_mat.process_batch(np.array(p), np.array(g))
     conf_mat.plot(os.path.join(st.session_state.work_dirs, st.session_state.val_file + '.png'))
-    st.session_state.confusion_matrix_image = os.path.join(st.session_state.work_dirs, st.session_state.val_file + '.png')
+    st.session_state.confusion_matrix_image = os.path.join(st.session_state.work_dirs,
+                                                           st.session_state.val_file + '.png')
 
     st.session_state.complete_pred = True
 
 
+def reload_train_data():
+    st.session_state.train_dataframe = f'{st.session_state.train_bbox_size}  {st.session_state.train_bbox_class}'
+    draw_train_image()
+
+
+def draw_train_image():
+    image_info = train_raw_dataset.loadImgs(st.session_state.selected_train_image_id)[0]
+    ann_ids = train_raw_dataset.getAnnIds(imgIds=image_info['id'])
+    anns = train_raw_dataset.loadAnns(ann_ids)
+
+    #st.write(f'{st.session_state.train_bbox_size}')
+    #st.write(f'{st.session_state.train_bbox_class}')
+    #st.write(f'{anns}')
+
+    filter_class = [classes.index(c) for c in st.session_state.train_bbox_class]
+    anns = [a for a in anns if a['category_id'] in filter_class]
+    if "Small" not in st.session_state.train_bbox_size:
+        anns = [a for a in anns if a['area'] >= 32**2]
+    if "Large" not in st.session_state.train_bbox_size:
+        anns = [a for a in anns if a['area'] < 96**2]
+    if "Medium" not in st.session_state.train_bbox_size:
+        anns = [a for a in anns if (a['area'] < 32**2 or a['area'] >= 96**2)]
+
+    #st.write(f'{anns}')
+
+    img_path = os.path.join(train_image_path, image_info['file_name'])
+    if anns is not None and len(anns) > 0:
+        bboxes = np.array([[ann["bbox"][0], ann["bbox"][1],
+                            ann["bbox"][0] + ann["bbox"][2], ann["bbox"][1] + ann["bbox"][3]] for ann in anns])
+        labels = np.array([ann["category_id"] for ann in anns])
+
+        st.session_state.train_bboxed_image = cv2.cvtColor(bbox_util.imshow_det_bboxes(img_path, bboxes, labels,
+                                                                                       bbox_color='voc',
+                                                                                       class_names=classes, font_size=12),
+                                                           cv2.COLOR_BGR2RGB)
+    else:
+        st.session_state.train_bboxed_image = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+
+
+def update_numin():
+    if st.session_state.number_input_image_id < 0:
+        st.session_state.number_input_image_id = 0
+    elif st.session_state.number_input_image_id > len(train_raw_dataset.dataset['images']) - 1:
+        st.session_state.number_input_image_id = len(train_raw_dataset.dataset['images']) - 1
+    st.session_state.selected_train_image_id = st.session_state.number_input_image_id
+    draw_train_image()
+
+
+def update_slider():
+    st.session_state.selected_train_image_id = st.session_state.slider_image_id
+    draw_train_image()
+
+
 # Main page
-st.title('EDA collections')
+init_session_manager()
+st.set_page_config(layout="wide")
+
+st.title('Train Image Viewer')
+st.text(f'Current Working Path: {os.getcwd()}    Datasets Path: {gt_path}[{os.path.exists(gt_path)}]')
+if os.path.exists(gt_path):
+    load_coco(gt_path)
+
+# st.write(train_raw_dataset.dataset)
+
+train_bbox_size = st.multiselect(
+    "Select Train Target Size (BBox)",
+    ['Small', 'Medium', 'Large'],
+    ['Small', 'Medium', 'Large'],
+    on_change=reload_train_data,
+    key='train_bbox_size'
+)
+train_bbox_class = st.multiselect(
+    "Select Category",
+    classes,
+    classes,
+    on_change=reload_train_data,
+    key='train_bbox_class'
+)
+with st.expander("See Dataframe"):
+    train_dataframe_placeholder = st.empty()
+    if st.session_state.train_dataframe:
+        train_dataframe_placeholder.write(st.session_state.train_dataframe)
+
+col1, col2 = st.columns([1, 5])
+col1.number_input('Image ID', step=1, value=st.session_state.selected_train_image_id,
+                  on_change=update_numin, key='number_input_image_id')
+col2.slider('Image ID', min_value=0, max_value=len(train_raw_dataset.dataset['images']) - 1,
+            value=st.session_state.selected_train_image_id,
+            on_change=update_slider, key='slider_image_id')
+train_image_placeholder = st.empty()
+draw_train_image()
+if st.session_state.train_bboxed_image is not None:
+    train_image_placeholder.image(st.session_state.train_bboxed_image)
+
 st.markdown('---')
+st.title('Validation Result EDA')
+st.markdown('### Data source')
 st.session_state.work_dirs = st.text_input('Input working_directory', st.session_state.work_dirs)
 st.session_state.val_file = st.text_input('Input validation csv filename', st.session_state.val_file)
-st.markdown('---')
 
+st.markdown('---')
 st.subheader('Confusion Matrix')
 
 eval_targets = st.multiselect(
@@ -231,10 +354,8 @@ require_sort = st.checkbox('Sort mAP')
 limit_bbox_iou = st.slider('Select minimum IoU', 0.05, 0.95, 0.5, 0.05)
 bbox_targets = st.multiselect(
     "Select Category",
-    ['General trash', "Paper", "Paper pack", "Metal", "Glass",
-     "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"],
-    ['General trash', "Paper", "Paper pack", "Metal", "Glass",
-     "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
+    classes,
+    classes
 )
 st.button('Show', type="primary")
 
