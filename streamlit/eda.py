@@ -259,7 +259,7 @@ def reload_train_data():
 
         if anns:
             temporary_dict['filename'].append([train_row['file_name']])
-            temporary_dict['ann_count'].append(len(ann_ids))
+            temporary_dict['ann_count'].append(len(anns))
             temporary_dict['ann_min_size'].append(anns[0]['area'])
             temporary_dict['ann_max_size'].append(anns[-1]['area'])
             temporary_dict['class_count'].append(len(set([a['category_id'] for a in anns])))
