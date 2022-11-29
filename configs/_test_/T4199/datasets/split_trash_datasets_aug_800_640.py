@@ -46,7 +46,7 @@ albu_train_transforms = [
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=(512, 512), keep_ratio=True),
+    dict(type='Resize', img_scale=(800, 640), keep_ratio=True),
     dict(
         type='Albu',
         transforms=albu_train_transforms,
@@ -74,7 +74,7 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(512, 512),
+        img_scale=(800, 640),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
