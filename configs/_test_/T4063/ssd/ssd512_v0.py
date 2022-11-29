@@ -1,22 +1,24 @@
-_base_ = [
-    # '../../../_module_/models/ssd300.py', 
-    '../../../_module_/datasets/coco_detection.py',
-    '../../../_module_/schedules/schedule_2x.py', 
-    # '../../../_module_/default_runtime.py'
-    '../../../_module_/amp/mixed_precision_fixed.py'
-]
-
-DATASET_TYPE = 'CocoDataset'
-DATA_ROOT = '/opt/ml/dataset'
-CLASS_LIST = ["General trash", "Paper", "Paper pack", "Metal", "Glass", 
-           "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
 INPUT_SIZE = 512
 NUM_CLASSES = 10
-WANDB_RUN_NAME = "SSD512v0"
-MAX_EPOCHS = 100
-BATCH_SIZE = 8
+DATASET_TYPE = 'CocoDataset'
+DATA_ROOT = '/opt/ml/dataset/'
+CLASS_LIST = [
+    'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic',
+    'Styrofoam', 'Plastic bag', 'Battery', 'Clothing'
+]
+WANDB_RUN_NAME = 'SSD512v0'
+BATCH_SIZE = 32
+AMP = 'dynamic' # dynamic or 512.
+EPOCH = 24
 CHECKPOINT_SAVE_INTERVAL = 5
+LOG_INTERVAL = 10
+INVALID_LOSS_CHECK_INTERVAL = 500
+LR = 2e-3
+TRAIN_JSON = 'train_split.json'
+VAL_JSON = 'val_split.json'
+TEST_JSON = 'test.json'
 
+# Model
 model = dict(
     type='SingleStageDetector',
     backbone=dict(
@@ -34,8 +36,8 @@ model = dict(
         out_channels=(512, 1024, 512, 256, 256, 256, 256),
         level_strides=(2, 2, 2, 2, 1),
         level_paddings=(1, 1, 1, 1, 1),
-        last_kernel_size=4,
-        l2_norm_scale=20),
+        l2_norm_scale=20,
+        last_kernel_size=4),
     bbox_head=dict(
         type='SSDHead',
         in_channels=(512, 1024, 512, 256, 256, 256, 256),
@@ -43,24 +45,23 @@ model = dict(
         anchor_generator=dict(
             type='SSDAnchorGenerator',
             scale_major=False,
-            input_size=INPUT_SIZE,
+            input_size=512,
             basesize_ratio_range=(0.1, 0.9),
             strides=[8, 16, 32, 64, 128, 256, 512],
             ratios=[[2], [2, 3], [2, 3], [2, 3], [2, 3], [2], [2]]),
         bbox_coder=dict(
             type='DeltaXYWHBBoxCoder',
-            target_means=[.0, .0, .0, .0],
+            target_means=[0.0, 0.0, 0.0, 0.0],
             target_stds=[0.1, 0.1, 0.2, 0.2])),
-    # model training and testing settings
     train_cfg=dict(
         assigner=dict(
             type='MaxIoUAssigner',
             pos_iou_thr=0.5,
             neg_iou_thr=0.5,
-            min_pos_iou=0.,
+            min_pos_iou=0.0,
             ignore_iof_thr=-1,
             gt_max_assign_all=False),
-        smoothl1_beta=1.,
+        smoothl1_beta=1.0,
         allowed_border=-1,
         pos_weight=-1,
         neg_pos_ratio=3,
@@ -73,22 +74,21 @@ model = dict(
         max_per_img=200))
 cudnn_benchmark = True
 
-
-# dataset settings
+# Data Pipeline
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[1, 1, 1], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
     dict(
         type='Expand',
-        mean=img_norm_cfg['mean'],
-        to_rgb=img_norm_cfg['to_rgb'],
+        mean=[123.675, 116.28, 103.53],
+        to_rgb=True,
         ratio_range=(1, 4)),
     dict(
         type='MinIoURandomCrop',
         min_ious=(0.1, 0.3, 0.5, 0.7, 0.9),
         min_crop_size=0.3),
-    dict(type='Resize', img_scale=(INPUT_SIZE, INPUT_SIZE), keep_ratio=False),
+    dict(type='Resize', img_scale=(512, 512), keep_ratio=False),
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(
         type='PhotoMetricDistortion',
@@ -96,42 +96,162 @@ train_pipeline = [
         contrast_range=(0.5, 1.5),
         saturation_range=(0.5, 1.5),
         hue_delta=18),
-    dict(type='Normalize', **img_norm_cfg),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[1, 1, 1],
+        to_rgb=True),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels']),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(INPUT_SIZE, INPUT_SIZE),
+        img_scale=(512, 512),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=False),
-            dict(type='Normalize', **img_norm_cfg),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[1, 1, 1],
+                to_rgb=True),
             dict(type='ImageToTensor', keys=['img']),
-            dict(type='Collect', keys=['img']),
+            dict(type='Collect', keys=['img'])
         ])
 ]
+
+# Data Loader
 data = dict(
     samples_per_gpu=BATCH_SIZE,
-    workers_per_gpu=4)
-# wandb log
+    workers_per_gpu=8,
+    train=dict(
+        type='CocoDataset',
+        ann_file=DATA_ROOT + TRAIN_JSON,
+        img_prefix=DATA_ROOT,
+        classes=CLASS_LIST,
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(
+                type='Expand',
+                mean=[123.675, 116.28, 103.53],
+                to_rgb=True,
+                ratio_range=(1, 4)),
+            dict(
+                type='MinIoURandomCrop',
+                min_ious=(0.1, 0.3, 0.5, 0.7, 0.9),
+                min_crop_size=0.3),
+            dict(type='Resize', img_scale=(INPUT_SIZE, INPUT_SIZE), keep_ratio=False),
+            dict(type='RandomFlip', flip_ratio=0.5),
+            dict(
+                type='PhotoMetricDistortion',
+                brightness_delta=32,
+                contrast_range=(0.5, 1.5),
+                saturation_range=(0.5, 1.5),
+                hue_delta=18),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[1, 1, 1],
+                to_rgb=True),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ]),
+    val=dict(
+        type='CocoDataset',
+        ann_file=DATA_ROOT + VAL_JSON,
+        img_prefix=DATA_ROOT,
+        classes=CLASS_LIST,
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(INPUT_SIZE, INPUT_SIZE),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=False),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[1, 1, 1],
+                        to_rgb=True),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CocoDataset',
+        ann_file=DATA_ROOT + TEST_JSON,
+        classes=CLASS_LIST,
+        img_prefix=DATA_ROOT,
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(INPUT_SIZE, INPUT_SIZE),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=False),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[1, 1, 1],
+                        to_rgb=True),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+
+# evaluation
+evaluation = dict(interval=1, metric='bbox')
+
+# optimizer
+optimizer = dict(type='SGD', lr=LR, momentum=0.9, weight_decay=0.0005)
+optimizer_config = dict()
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[16, 22])
+
+# Runner
+runner = dict(type='EpochBasedRunner', max_epochs=EPOCH)
+
+# checkpoint
+checkpoint_config = dict(interval=CHECKPOINT_SAVE_INTERVAL)
+
+# wandb Log
 log_config = dict(
-    interval=50,
+    interval=LOG_INTERVAL,
     hooks=[
-         dict(type='TextLoggerHook'),
-         dict(type='MMDetWandbHook',
-             init_kwargs={'project': 'Trash Detection', "entity": "light-observer", "name": WANDB_RUN_NAME},
-         interval=10,
-         log_checkpoint=False,
-         log_checkpoint_metadata=True,
-         num_eval_images=0,
-         bbox_score_thr=0.3)
+        dict(type='TextLoggerHook'),
+        dict(
+            type='MMDetWandbHook',
+            init_kwargs=dict(
+                project='Trash Detection',
+                entity='light-observer',
+                name=WANDB_RUN_NAME),
+            interval=10,
+            log_checkpoint=False,
+            log_checkpoint_metadata=True,
+            num_eval_images=0,
+            bbox_score_thr=0.3)
     ])
 
-# default runtime setting
-checkpoint_config = dict(interval=CHECKPOINT_SAVE_INTERVAL)
+# custom hook
+custom_hooks = [
+    dict(type='NumClassCheckHook'),
+    dict(type='CheckInvalidLossHook', interval=INVALID_LOSS_CHECK_INTERVAL, priority='VERY_LOW')
+]
+
+# AMP
+fp16 = dict(loss_scale=AMP)
+
+# etc
+
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
@@ -139,7 +259,6 @@ resume_from = None
 workflow = [('train', 1)]
 opencv_num_threads = 0
 mp_start_method = 'fork'
-# runner = dict(type='EpochBasedRunner', max_epochs=MAX_EPOCHS)
-
-# auto sacle lr
-auto_scale_lr = dict(base_batch_size=16)
+auto_scale_lr = dict(enable=True, base_batch_size=8)
+auto_resume = False
+gpu_ids = [0]
