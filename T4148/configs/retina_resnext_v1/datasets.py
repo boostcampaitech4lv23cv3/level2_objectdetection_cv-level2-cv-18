@@ -6,7 +6,7 @@ data_root = '/opt/ml/dataset'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
-albu_train_transforms = [    # 알부멘테이션 사용
+albu_train_transforms = [   
     dict(
         type='ShiftScaleRotate',
         shift_limit=0.0625,
@@ -51,10 +51,10 @@ albu_train_transforms = [    # 알부멘테이션 사용
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=[(768, 512), (512, 768)], multiscale_mode = 'value', keep_ratio=True),
+    dict(type='Resize', img_scale=[(512, 768), (768, 512)], multiscale_mode = 'value', keep_ratio=True),
     dict(
     type='Albu',
-    transforms=albu_train_transforms, # 추가 부분
+    transforms=albu_train_transforms, 
     bbox_params=dict(
         type='BboxParams',
         format='pascal_voc',
@@ -95,11 +95,12 @@ classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
 
 
 data = dict(
-    samples_per_gpu=32,
+    samples_per_gpu=16,
     workers_per_gpu=8,
+    
     train=dict(
         type=dataset_type,
-        ann_file=data_root + '/train_split.json',
+        ann_file=data_root + '/train.json',
         img_prefix=data_root ,
         classes= classes,
         pipeline=train_pipeline),
@@ -116,4 +117,4 @@ data = dict(
         img_prefix=data_root ,
         pipeline=test_pipeline))
 
-evaluation = dict(interval=1, metric='bbox', save_best='auto')
+evaluation = dict(interval=1, metric='bbox',save_best='auto')
