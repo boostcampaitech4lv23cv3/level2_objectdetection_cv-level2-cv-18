@@ -7,15 +7,15 @@ CLASS_LIST = [
     'Styrofoam', 'Plastic bag', 'Battery', 'Clothing'
 ]
 WANDB_RUN_NAME = 'SSD512v0'
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 AMP = 'dynamic' # dynamic or 512.
 EPOCH = 24
 CHECKPOINT_SAVE_INTERVAL = 5
 LOG_INTERVAL = 10
 INVALID_LOSS_CHECK_INTERVAL = 500
 LR = 2e-3
-TRAIN_JSON = 'train_split.json'
-VAL_JSON = 'val_split.json'
+TRAIN_JSON = 'train_drop.json'
+VAL_JSON = 'train_drop.json'
 TEST_JSON = 'test.json'
 
 # Model
