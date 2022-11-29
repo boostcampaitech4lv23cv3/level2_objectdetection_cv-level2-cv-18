@@ -51,7 +51,7 @@ albu_train_transforms = [    # 알부멘테이션 사용
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', img_scale=[(768, 512), (512, 768)], multiscale_mode = 'value', keep_ratio=True),
+    dict(type='Resize', img_scale=[(1333, 640), (1333, 800)],multiscale_mode='range', keep_ratio=True),
     dict(
     type='Albu',
     transforms=albu_train_transforms, # 추가 부분
@@ -95,7 +95,7 @@ classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
 
 
 data = dict(
-    samples_per_gpu=32,
+    samples_per_gpu=16,
     workers_per_gpu=8,
     train=dict(
         type=dataset_type,
