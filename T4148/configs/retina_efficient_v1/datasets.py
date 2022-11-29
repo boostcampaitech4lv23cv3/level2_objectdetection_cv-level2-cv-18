@@ -48,7 +48,6 @@ albu_train_transforms = [    # 알부멘테이션 사용
 ]
 
 
-
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
@@ -80,7 +79,7 @@ classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
 
 
 data = dict(
-    samples_per_gpu=32,
+    samples_per_gpu=16,
     workers_per_gpu=8,
     train=dict(
         type=dataset_type,
