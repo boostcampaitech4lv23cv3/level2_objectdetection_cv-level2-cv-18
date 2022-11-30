@@ -8,7 +8,7 @@ log_config = dict(
              init_kwargs={
                  'project': 'Trash Detection',
                  "entity": "light-observer",
-                 "name": "faster_rcnn_x101"
+                 "name": "Final YOLOX"
              },
              interval=10,
              log_checkpoint=False,
