@@ -8,15 +8,20 @@ CLASS_LIST = [
 ]
 WANDB_RUN_NAME = 'SSD512v0'
 BATCH_SIZE = 64
+VAL_BATCH_SIZE = 32
 AMP = 'dynamic' # dynamic or 512.
 EPOCH = 24
 CHECKPOINT_SAVE_INTERVAL = 5
 LOG_INTERVAL = 10
 INVALID_LOSS_CHECK_INTERVAL = 500
-LR = 2e-3
+EVALUATION_INTERVAL = 1
+LR = 1e-3
 TRAIN_JSON = 'train_drop.json'
 VAL_JSON = 'train_drop.json'
 TEST_JSON = 'test.json'
+WARMUP_ITERS = 5000
+WARMUP_RATIO = 0.001
+
 
 # Model
 model = dict(
@@ -161,6 +166,7 @@ data = dict(
         ]),
     val=dict(
         type='CocoDataset',
+        samples_per_gpu=VAL_BATCH_SIZE,
         ann_file=DATA_ROOT + VAL_JSON,
         img_prefix=DATA_ROOT,
         classes=CLASS_LIST,
@@ -205,7 +211,7 @@ data = dict(
         ]))
 
 # evaluation
-evaluation = dict(interval=1, metric='bbox')
+evaluation = dict(interval=EVALUATION_INTERVAL, metric='bbox')
 
 # optimizer
 optimizer = dict(type='SGD', lr=LR, momentum=0.9, weight_decay=0.0005)
@@ -213,8 +219,8 @@ optimizer_config = dict()
 lr_config = dict(
     policy='step',
     warmup='linear',
-    warmup_iters=500,
-    warmup_ratio=0.001,
+    warmup_iters=WARMUP_ITERS,
+    warmup_ratio=WARMUP_RATIO,
     step=[16, 22])
 
 # Runner
@@ -251,7 +257,6 @@ custom_hooks = [
 fp16 = dict(loss_scale=AMP)
 
 # etc
-
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
