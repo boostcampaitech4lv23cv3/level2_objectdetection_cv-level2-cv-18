@@ -1,15 +1,16 @@
-pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v2.0.0/swinv2_tiny_patch4_window8_256.pth'  # noqa
+# model settings
 
+pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window7_224_22k.pth'  # noqa
 
 model = dict(
     type='RetinaNet',
     backbone=dict(
         # _delete_=True,
         type='SwinTransformer',
-        embed_dims=96,
-        depths=[2, 2, 6, 2],
-        num_heads=[3, 6, 12, 24],
-        window_size=8,
+        embed_dims=192,
+        depths=[2, 2, 18, 2],
+        num_heads=[6, 12, 24, 48],
+        window_size=7,
         mlp_ratio=4,
         qkv_bias=True,
         qk_scale=None,
@@ -23,9 +24,9 @@ model = dict(
         init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
     neck=dict(
         type='FPN',
-        in_channels=[384, 768, 1536],
+        in_channels=[192, 384, 768, 1536],
         out_channels=256,
-        start_level=0,
+        start_level=1,
         add_extra_convs='on_input',
         num_outs=5),
     bbox_head=dict(
@@ -45,10 +46,10 @@ model = dict(
             target_means=[.0, .0, .0, .0],
             target_stds=[1.0, 1.0, 1.0, 1.0]),
         loss_cls=dict(
-            type='CrossEntropyLoss',
-            use_sigmoid=False,
-            #gamma=2.0,
-            #alpha=0.25,
+            type='FocalLoss',
+            use_sigmoid=True,
+            gamma=2.0,
+            alpha=0.25,
             loss_weight=1.0),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
     # model training and testing settings
