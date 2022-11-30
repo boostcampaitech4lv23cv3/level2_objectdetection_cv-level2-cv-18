@@ -34,13 +34,11 @@ def main(args:argparse.Namespace):
             if ann['area'] < 100 :
                 print(' - droped :', ann['id'], ' cz small area')
                 continue;
-            elif ann['bbox'][2] < 9:
+            elif ann['bbox'][2] < 20 or ann['bbox'][3] < 20:
                 print(' - droped :', ann['id'], ' cz small width')
                 continue;
-            elif ann['bbox'][3] < 9:
-                print(' - droped :', ann['id'], ' cz small height')
-                continue;
             refined_annotations.append(ann)
+        print(' * original size : ', len(annotations), ' / result size : ', len(refined_annotations), ' / total removed : ', len(annotations) - len(refined_annotations))
         result_json['annotations'] = refined_annotations
         with open(result_path, "w") as json_file:
             json.dump(result_json, json_file)
