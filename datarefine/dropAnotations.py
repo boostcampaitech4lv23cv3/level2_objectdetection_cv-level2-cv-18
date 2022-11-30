@@ -13,6 +13,8 @@ def parse_args() -> argparse.Namespace:
                         default='train.json',
                         help='target json file name in dataset root folder')
     parser.add_argument('-rr', help='result folder path', type=str, default="/opt/ml/dataset")
+    parser.add_argument('-dmn', help='min drop', type=bool, default=True)
+    parser.add_argument('-dmx', help='max drop', type=bool, default=True)
     parser.add_argument('result_json',
                         type=str,
                         default='train.json',
@@ -31,12 +33,21 @@ def main(args:argparse.Namespace):
         refined_annotations = []
         annotations = source_json['annotations']
         for i, ann in tqdm(enumerate(annotations)):
-            if ann['area'] < 100 :
-                print(' - droped :', ann['id'], ' cz small area')
-                continue;
-            elif ann['bbox'][2] < 20 or ann['bbox'][3] < 20:
-                print(' - droped :', ann['id'], ' cz small width')
-                continue;
+            if args.dmn == True:
+                if ann['area'] < 100 :
+                    print(' - droped :', ann['id'], ' cz small area')
+                    continue;
+                elif ann['bbox'][2] < 20 or ann['bbox'][3] < 20:
+                    print(' - droped :', ann['id'], ' cz small width')
+                    continue;
+            if args.dmx == True:
+                if ann['bbox'][2] > 1000 or ann['bbox'][3] > 1000: 
+                    if ann['area'] > 1000*900 :
+                        # 0 : general / 1 : paper / 7 : plastic bag
+                        if ann['category_id'] == 0 or ann['category_id'] == 1 or ann['category_id'] == 7:
+                            print(' - droped :', ann['id'], ' cz big WH and big area')
+                            continue;
+            
             refined_annotations.append(ann)
         print(' * original size : ', len(annotations), ' / result size : ', len(refined_annotations), ' / total removed : ', len(annotations) - len(refined_annotations))
         result_json['annotations'] = refined_annotations
