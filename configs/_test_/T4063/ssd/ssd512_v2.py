@@ -6,24 +6,26 @@ CLASS_LIST = [
     'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic',
     'Styrofoam', 'Plastic bag', 'Battery', 'Clothing'
 ]
-WANDB_RUN_NAME = 'SSD512v0'
+WANDB_RUN_NAME = 'SSD512v2'
 BATCH_SIZE = 64
 VAL_BATCH_SIZE = 32
 AMP = 'dynamic' # dynamic or 512.
-EPOCH = 24
+EPOCH = 10
 CHECKPOINT_SAVE_INTERVAL = 5
+CHECKPOINT_LOAD_PATH = './work_dirs/ssd512_base/epoch_24.pth'
 LOG_INTERVAL = 10
 INVALID_LOSS_CHECK_INTERVAL = 500
 EVALUATION_INTERVAL = 1
-LR = 1e-3
-TRAIN_JSON = 'train_drop.json'
-VAL_JSON = 'train_drop.json'
+LR = 1e-4
+TRAIN_JSON = 'train_eda_dropmini.json'
+VAL_JSON = 'train_eda_dropmini.json'
 TEST_JSON = 'test.json'
-WARMUP_ITERS = 5000
+WARMUP_ITERS = 1000
 WARMUP_RATIO = 0.001
 
 
 # Model
+load_from = CHECKPOINT_LOAD_PATH
 model = dict(
     type='SingleStageDetector',
     backbone=dict(
@@ -32,9 +34,7 @@ model = dict(
         with_last_pool=False,
         ceil_mode=True,
         out_indices=(3, 4),
-        out_feature_indices=(22, 34),
-        init_cfg=dict(
-            type='Pretrained', checkpoint='open-mmlab://vgg16_caffe')),
+        out_feature_indices=(22, 34)),
     neck=dict(
         type='SSDNeck',
         in_channels=(512, 1024),
@@ -77,6 +77,7 @@ model = dict(
         min_bbox_size=0,
         score_thr=0.02,
         max_per_img=200))
+
 cudnn_benchmark = True
 
 # Data Pipeline
@@ -259,7 +260,6 @@ fp16 = dict(loss_scale=AMP)
 # etc
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
 resume_from = None
 workflow = [('train', 1)]
 opencv_num_threads = 0
