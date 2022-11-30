@@ -12,8 +12,8 @@ from pycocotools.coco import COCO
 import mmdet.core.visualization.image as bbox_util
 
 # Configuration
-gt_path = '../dataset/train.json'
-train_image_path = '../dataset'
+gt_path = '/opt/ml/dataset/train.json'
+train_image_path = '/opt/ml/dataset'
 classes = ["General trash", "Paper", "Paper pack", "Metal", "Glass",
            "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
 
@@ -36,13 +36,13 @@ def init_session_manager():
         st.session_state.train_bboxed_image = None
 
     if "work_dirs" not in st.session_state:
-        st.session_state.work_dirs = './work_dirs/mask-rcnn'
+        st.session_state.work_dirs = "./work_dirs/mask-rcnn"
 
     if "pth_file" not in st.session_state:
-        st.session_state.pth_file = 'best_bbox_mAP_epoch_300.pth'
+        st.session_state.pth_file = "best_bbox_mAP_epoch_300.pth"
 
     if "val_file" not in st.session_state:
-        st.session_state.val_file = 'best_bbox_mAP_epoch_300.pth_submission.csv'
+        st.session_state.val_file = "best_bbox_mAP_epoch_300.pth_submission.csv"
 
     if "selected_train_image_id" not in st.session_state:
         st.session_state.selected_train_image_id = 0
@@ -322,81 +322,83 @@ def update_slider():
 
 # Main page
 st.set_page_config(layout="wide")
+tab1, tab2 = st.tabs(["Train Image Viewer", "Valid Image Viewer", "Valid Confusion Matrix"])
 
-st.title('Train Image Viewer')
-st.text(f'Current Working Path: {os.getcwd()}    Datasets Path: {gt_path}[{os.path.exists(gt_path)}]')
-if os.path.exists(gt_path):
-    init_session_manager()
-else:
-    st.error('Not found: Datasets', icon="🚨")
-    st.stop()
+with tab1:
+    st.title('Train Image Viewer')
+    st.text(f'Current Working Path: {os.getcwd()}    Datasets Path: {gt_path}[{os.path.exists(gt_path)}]')
+    if os.path.exists(gt_path):
+        init_session_manager()
+    else:
+        st.error('Not found: Datasets', icon="🚨")
+        st.stop()
 
-# st.write(st.session_state.train_raw_dataset.dataset)
+    # st.write(st.session_state.train_raw_dataset.dataset)
 
-train_bbox_size = st.multiselect(
-    "Select Train Target Size (BBox)",
-    ['Remove ↓1**2', 'Small', 'Medium', 'Large', 'Remove ↑1023**2'],
-    ['Small', 'Medium', 'Large'],
-    on_change=reload_train_data,
-    key='train_bbox_size'
-)
-train_bbox_class = st.multiselect(
-    "Select Category",
-    classes,
-    classes,
-    on_change=reload_train_data,
-    key='train_bbox_class'
-)
-with st.expander("See Dataframe"):
-    train_dataframe_placeholder = st.empty()
-    reload_train_data()
-    if st.session_state.train_dataframe is not None:
-        train_dataframe_placeholder.dataframe(st.session_state.train_dataframe)
+    train_bbox_size = st.multiselect(
+        "Select Train Target Size (BBox)",
+        ['Remove ↓1**2', 'Small', 'Medium', 'Large', 'Remove ↑1023**2'],
+        ['Small', 'Medium', 'Large'],
+        on_change=reload_train_data,
+        key='train_bbox_size'
+    )
+    train_bbox_class = st.multiselect(
+        "Select Category",
+        classes,
+        classes,
+        on_change=reload_train_data,
+        key='train_bbox_class'
+    )
+    with st.expander("See Dataframe"):
+        train_dataframe_placeholder = st.empty()
+        reload_train_data()
+        if st.session_state.train_dataframe is not None:
+            train_dataframe_placeholder.dataframe(st.session_state.train_dataframe)
 
-col1, col2 = st.columns([1, 5])
-col1.number_input('Image ID', step=1, value=st.session_state.selected_train_image_id,
-                  on_change=update_numin, key='number_input_image_id')
-col2.slider('Image ID', min_value=0, max_value=len(st.session_state.train_raw_dataset.dataset['images']) - 1,
-            value=st.session_state.selected_train_image_id,
-            on_change=update_slider, key='slider_image_id')
-train_image_placeholder = st.empty()
-draw_train_image()
-if st.session_state.train_bboxed_image is not None:
-    train_image_placeholder.image(st.session_state.train_bboxed_image)
-    with st.expander("See Annotations"):
-        st.dataframe(st.session_state.train_anns)
+    col1, col2 = st.columns([1, 5])
+    col1.number_input('Image ID', step=1, value=st.session_state.selected_train_image_id,
+                      on_change=update_numin, key='number_input_image_id')
+    col2.slider('Image ID', min_value=0, max_value=len(st.session_state.train_raw_dataset.dataset['images']) - 1,
+                value=st.session_state.selected_train_image_id,
+                on_change=update_slider, key='slider_image_id')
+    train_image_placeholder = st.empty()
+    draw_train_image()
+    if st.session_state.train_bboxed_image is not None:
+        train_image_placeholder.image(st.session_state.train_bboxed_image)
+        with st.expander("See Annotations"):
+            st.dataframe(st.session_state.train_anns)
 
 
-st.markdown('---')
-st.title('Validation Result EDA')
-st.markdown('### Data source')
-st.session_state.work_dirs = st.text_input('Input working_directory', st.session_state.work_dirs)
-st.session_state.val_file = st.text_input('Input validation csv filename', st.session_state.val_file)
+with tab2:
+    st.title('Validation Result EDA')
+    st.markdown('### Data source')
+    st.session_state.work_dirs = st.text_input('Input working_directory (Valid )', st.session_state.work_dirs, key='val_work_dirs')
+    st.session_state.val_file = st.text_input('Input validation csv filename (Valid )', st.session_state.val_file, key='val_file')
 
-st.markdown('---')
-st.subheader('Confusion Matrix')
+    st.subheader('Confusion Matrix')
+    st.markdown('### Data source')
+    st.session_state.work_dirs = st.text_input('Input working_directory (Confusion Matrix )', st.session_state.work_dirs, key='val_cm_work_dirs')
+    st.session_state.val_file = st.text_input('Input validation csv filename (Confusion Matrix )', st.session_state.val_file, key='val_cm_file')
 
-eval_targets = st.multiselect(
-    "Select Evaluation Size (BBox)",
-    ['Small', 'Medium', 'Large'],
-    ['Medium', 'Large']
-)
-limit_cm_iou = st.slider('Select IoU', 0.05, 0.95, 0.5, 0.05)
+    eval_targets = st.multiselect(
+        "Select Evaluation Size (BBox)",
+        ['Small', 'Medium', 'Large'],
+        ['Medium', 'Large']
+    )
+    limit_cm_iou = st.slider('Select IoU', 0.05, 0.95, 0.5, 0.05)
 
-st.button('Draw', on_click=draw_confusion_matrix, type="primary")
-cm_placeholder = st.empty()
-if st.session_state.complete_pred and st.session_state.confusion_matrix_image:
-    cm_placeholder.image(st.session_state.confusion_matrix_image)
-st.markdown('---')
+    st.button('Draw', on_click=draw_confusion_matrix, type="primary")
+    cm_placeholder = st.empty()
+    if st.session_state.complete_pred and st.session_state.confusion_matrix_image:
+        cm_placeholder.image(st.session_state.confusion_matrix_image)
+    st.markdown('---')
 
-st.subheader('Boundary Box with Image')
-require_sort = st.checkbox('Sort mAP')
-limit_bbox_iou = st.slider('Select minimum IoU', 0.05, 0.95, 0.5, 0.05)
-bbox_targets = st.multiselect(
-    "Select Category",
-    classes,
-    classes
-)
-st.button('Show', type="primary")
-
-st.markdown('---')
+    st.subheader('Boundary Box with Image')
+    require_sort = st.checkbox('Sort mAP')
+    limit_bbox_iou = st.slider('Select minimum IoU', 0.05, 0.95, 0.5, 0.05)
+    bbox_targets = st.multiselect(
+        "Select Category",
+        classes,
+        classes
+    )
+    st.button('Show', type="primary")
