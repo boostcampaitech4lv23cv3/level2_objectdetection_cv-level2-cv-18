@@ -36,13 +36,13 @@ def init_session_manager():
         st.session_state.train_bboxed_image = None
 
     if "work_dirs" not in st.session_state:
-        st.session_state.work_dirs = './work_dirs/mask-rcnn'
+        st.session_state.work_dirs = "./work_dirs/mask-rcnn"
 
     if "pth_file" not in st.session_state:
-        st.session_state.pth_file = 'best_bbox_mAP_epoch_300.pth'
+        st.session_state.pth_file = "best_bbox_mAP_epoch_300.pth"
 
     if "val_file" not in st.session_state:
-        st.session_state.val_file = 'best_bbox_mAP_epoch_300.pth_submission.csv'
+        st.session_state.val_file = "best_bbox_mAP_epoch_300.pth_submission.csv"
 
     if "selected_train_image_id" not in st.session_state:
         st.session_state.selected_train_image_id = 0
@@ -322,7 +322,7 @@ def update_slider():
 
 # Main page
 st.set_page_config(layout="wide")
-tab1, tab2, tab3 = st.tabs(["Train Image Viewer", "Valid Image Viewer", "Valid Confusion Matrix"])
+tab1, tab2 = st.tabs(["Train Image Viewer", "Valid Image Viewer", "Valid Confusion Matrix"])
 
 with tab1:
     st.title('Train Image Viewer')
@@ -372,12 +372,13 @@ with tab1:
 with tab2:
     st.title('Validation Result EDA')
     st.markdown('### Data source')
-    st.session_state.work_dirs = st.text_input('Input working_directory', st.session_state.work_dirs)
-    st.session_state.val_file = st.text_input('Input validation csv filename', st.session_state.val_file)
+    st.session_state.work_dirs = st.text_input('Input working_directory (Valid )', st.session_state.work_dirs, key='val_work_dirs')
+    st.session_state.val_file = st.text_input('Input validation csv filename (Valid )', st.session_state.val_file, key='val_file')
 
-
-with tab3:
     st.subheader('Confusion Matrix')
+    st.markdown('### Data source')
+    st.session_state.work_dirs = st.text_input('Input working_directory (Confusion Matrix )', st.session_state.work_dirs, key='val_cm_work_dirs')
+    st.session_state.val_file = st.text_input('Input validation csv filename (Confusion Matrix )', st.session_state.val_file, key='val_cm_file')
 
     eval_targets = st.multiselect(
         "Select Evaluation Size (BBox)",
