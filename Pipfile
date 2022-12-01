@@ -27,11 +27,13 @@ numpy = "*"
 autopep8 = "*"
 mmdet = "*"
 sahi = "*"
+timm = "*"
 
 [dev-packages]
 gpustat = "*"
 streamlit = "*"
 matplotlib = "*"
+labelimg = "*"
 
 [requires]
 python_version = "3.8"
