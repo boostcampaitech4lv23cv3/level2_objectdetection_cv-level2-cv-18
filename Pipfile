@@ -28,6 +28,7 @@ autopep8 = "*"
 mmdet = "*"
 sahi = "*"
 timm = "*"
+ensemble-boxes = "*"
 
 [dev-packages]
 gpustat = "*"
