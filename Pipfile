@@ -27,6 +27,7 @@ numpy = "*"
 autopep8 = "*"
 mmdet = "*"
 sahi = "*"
+timm = "*"
 
 [dev-packages]
 gpustat = "*"
