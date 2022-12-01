@@ -33,6 +33,7 @@ timm = "*"
 gpustat = "*"
 streamlit = "*"
 matplotlib = "*"
+labelimg = "*"
 
 [requires]
 python_version = "3.8"
