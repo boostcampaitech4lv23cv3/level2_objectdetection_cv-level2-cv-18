@@ -8,7 +8,7 @@ log_config = dict(
              init_kwargs={
                  'project': 'Trash Detection',
                  "entity": "light-observer",
-                 "name": "DataClean_Retina-Effb3-02"
+                 "name": "Final YOLOX"
              },
              interval=5,
              log_checkpoint=True,
