@@ -6,7 +6,7 @@ log_config = dict(
          dict(type='TextLoggerHook'),
          # dict(type='TensorboardLoggerHook'),
          dict(type='MMDetWandbHook',
-             init_kwargs={'project': 'Trash Detection', "entity": "light-observer", "name" : "cascade_mask_rcnn_r50_v1"},
+             init_kwargs={'project': 'Trash Detection', "entity": "light-observer", "name" : "retinanet_resnet101"},
          interval=100,
          log_checkpoint=False,
          log_checkpoint_metadata=True,
@@ -18,7 +18,7 @@ custom_hooks = [dict(type='NumClassCheckHook')]
 
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = 'https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r101_fpn_mstrain_3x_coco/retinanet_r101_fpn_mstrain_3x_coco_20210720_214650-7ee888e0.pth'
 resume_from = None
 workflow = [('train', 1)]
 
