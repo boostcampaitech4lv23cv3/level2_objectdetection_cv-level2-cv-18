@@ -67,8 +67,8 @@ def main(work_dir:str, epoch_name:str) :
         image_info = coco.loadImgs(coco.getImgIds(imgIds=i))[0] # type: ignore
         for j in range(class_num):
             for o in out[j]:
-                prediction_string += str(j) + ' ' + str(o[4]) + ' ' + str(o[0]) + ' ' + str(o[1]) + ' ' + str(
-                    o[2]) + ' ' + str(o[3]) + ' '
+                if o[4] > 0.3:
+                    prediction_string += str(j) + ' ' + str(o[4]) + ' ' + str(o[0]) + ' ' + str(o[1]) + ' ' + str(o[2]) + ' ' + str(o[3]) + ' '
 
         prediction_strings.append(prediction_string)
         file_names.append(image_info['file_name'])

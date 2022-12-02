@@ -322,7 +322,7 @@ def update_slider():
 
 # Main page
 st.set_page_config(layout="wide")
-tab1, tab2 = st.tabs(["Train Image Viewer", "Valid Image Viewer", "Valid Confusion Matrix"])
+tab1, tab2 = st.tabs(["Train Image Viewer", "Valid Image / Confusion Matrix"])
 
 with tab1:
     st.title('Train Image Viewer')
@@ -372,8 +372,8 @@ with tab1:
 with tab2:
     st.title('Validation Result EDA')
     st.markdown('### Data source')
-    st.session_state.work_dirs = st.text_input('Input working_directory (Valid )', st.session_state.work_dirs, key='val_work_dirs')
-    st.session_state.val_file = st.text_input('Input validation csv filename (Valid )', st.session_state.val_file, key='val_file')
+    #st.session_state.work_dirs = st.text_input('Input working_directory (Valid )', st.session_state.work_dirs, key='val_work_dirs')
+    #st.session_state.val_file = st.text_input('Input validation csv filename (Valid )', st.session_state.val_file, key='val_file')
 
     st.subheader('Confusion Matrix')
     st.markdown('### Data source')
