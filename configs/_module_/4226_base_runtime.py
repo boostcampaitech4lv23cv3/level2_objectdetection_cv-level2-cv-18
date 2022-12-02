@@ -8,7 +8,7 @@ log_config = dict(
              init_kwargs={
                  'project': 'Trash Detection',
                  "entity": "light-observer",
-                 "name": "Retina-Effb3-01"
+                 "name": "DataClean_Retina-Effb3-02"
              },
              interval=5,
              log_checkpoint=True,
